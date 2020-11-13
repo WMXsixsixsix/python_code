@@ -1,0 +1,64 @@
+
+#手套箱概率
+prob = [0.00256, 0.00639, 0.03197, 0.15985, 0.79923]
+#磨损度
+cost_len = 5
+cost = ['薪新出厂', '略有磨损', '久经沙场', '跛损不堪', '战痕累累']
+cost_value = [0.07, 0.08, 0.23, 0.07, 0.55 ]
+
+def readBoxData(box_list):
+    file = open(" Glove_weapon_box.txt", 'r', encoding='UTF-8')
+    while 1:
+        line = file.readline()
+        if not line:
+            break
+        line.strip('\n')
+        box_list.append(line.split())
+    file.close()
+
+
+def readWeaponData(weapon_list):
+    file = open("history_1.txt", 'r', encoding='UTF-8')
+    while 1:
+        line = file.readline()
+        if not line:
+            break
+        line = line.replace('\n', '')
+        line = line.replace('[', '')
+        line = line.replace(']', '')
+        line = line.replace('\'', '')
+        line = line.replace('\"', '')
+        line = line.split(',')
+        for i in range(0, len(line)-2, 2):
+            weapon_list.append([line[i], line[i+1]])
+    file.close()
+
+result = 0.0
+box_list = []
+weapon_list = []
+ilt = []
+readBoxData(box_list)
+readWeaponData(weapon_list)
+news_weaponlist = []
+for weapon in weapon_list:
+    if weapon not in news_weaponlist:
+        news_weaponlist.append(weapon)
+
+glove_num = 82
+
+for weapon_item in news_weaponlist:
+    for box_item in box_list:
+        if weapon_item[1].find(box_item[1]) != -1 and weapon_item[1].find(box_item[2]) != -1:
+            glove_prob = 1.0
+            if weapon_item[1].find('手套') != -1:
+                glove_prob = 1.0 / 82.0
+            for i in range(cost_len):
+                if weapon_item[1].find(cost[i]) != -1:
+                    stat_prob = 1.0
+                    if weapon_item[1].find('StatTrak™') != -1:
+                        stat_prob = 1/10
+                    compute = cost_value[i] * prob[int(box_item[0])] * float(weapon_item[0]) * stat_prob * glove_prob
+                    print(weapon_item[0], weapon_item[1])
+                    result += compute
+
+print(result)
